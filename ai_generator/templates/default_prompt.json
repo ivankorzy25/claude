@@ -1,0 +1,8 @@
+{
+    "version": "base",
+    "name": "Prompt Base Original",
+    "description": "Versión inicial del prompt para generación de descripciones",
+    "created_at": "2024-06-25T01:34:56.000000",
+    "prompt": "Eres un experto en redacción de descripciones comerciales para productos industriales.\n        \nGenera una descripción profesional y persuasiva para el siguiente producto:\n\nTipo de producto: {product_type}\nInformación del producto:\n- Nombre: {nombre}\n- Marca: {marca}\n- Modelo: {modelo}\n- Potencia: {potencia_kva} KVA\n- Motor: {motor}\n- Características técnicas: {tech_specs}\n\nINSTRUCCIONES ESPECÍFICAS:\n1. La descripción debe ser profesional y orientada a la venta\n2. Destaca los beneficios principales y ventajas competitivas\n3. Menciona aplicaciones típicas del producto ({applications})\n4. Enfócate especialmente en: {focus_areas}\n5. La descripción debe tener entre 150-200 palabras\n6. USA SOLO PÁRRAFOS, no uses listas con viñetas ni bullets\n7. NO uses emojis ni caracteres especiales\n8. Mantén un tono profesional pero cercano y persuasivo\n9. Divide el contenido en 2-3 párrafos bien estructurados\n\nFORMATO DE SALIDA:\n- Solo devuelve el texto de los párrafos\n- Separa cada párrafo con un salto de línea simple\n- No incluyas etiquetas HTML ni formato markdown\n- No uses asteriscos, guiones ni viñetas\n\nRecuerda: El objetivo es convencer al cliente de que este es el producto ideal para sus necesidades.",
+    "is_base": true
+}

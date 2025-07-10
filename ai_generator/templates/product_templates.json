@@ -1,0 +1,22 @@
+{
+    "grupo_electrogeno": {
+        "keywords": ["generador", "grupo electrógeno", "kva", "kw"],
+        "focus": "potencia, autonomía, motor",
+        "applications": "respaldo energético, obras, industria"
+    },
+    "compresor": {
+        "keywords": ["compresor", "psi", "bar", "aire comprimido"],
+        "focus": "presión, caudal, tanque",
+        "applications": "talleres, pintura, herramientas neumáticas"
+    },
+    "motobomba": {
+        "keywords": ["motobomba", "bomba", "caudal", "litros"],
+        "focus": "caudal, altura máxima, succión",
+        "applications": "riego, drenaje, construcción"
+    },
+    "motocultivador": {
+        "keywords": ["motocultivador", "cultivador", "labranza"],
+        "focus": "potencia, ancho de trabajo, profundidad",
+        "applications": "agricultura, huertos, preparación de suelo"
+    }
+}

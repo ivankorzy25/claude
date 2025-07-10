@@ -1,0 +1,7 @@
+{
+    "host": "localhost",
+    "user": "root",
+    "password": "tu_password",
+    "database": "lista_precios_kor",
+    "table": "shop_master_gaucho_completo"
+}

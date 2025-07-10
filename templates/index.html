@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEL Shop Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <h1>🏭 STEL Shop Manager</h1>
+                <span class="version">v1.0.0</span>
+            </div>
+            <div class="header-status">
+                <div class="status-item" id="db-status">
+                    <span class="status-icon">🗄️</span>
+                    <span class="status-text">MySQL: <span id="db-status-text">Desconectado</span></span>
+                </div>
+                <div class="status-item" id="browser-status">
+                    <span class="status-icon">🌐</span>
+                    <span class="status-text">Chrome: <span id="browser-status-text">No iniciado</span></span>
+                </div>
+                <div class="status-item" id="ai-status">
+                    <span class="status-icon">🤖</span>
+                    <span class="status-text">IA: <span id="ai-status-text">No configurado</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab('products')">
+                    📦 Productos
+                </button>
+                <button class="tab-button" onclick="openTab('ai-generator')">
+                    🤖 Generador IA
+                </button>
+                <button class="tab-button" onclick="openTab('navigation')">
+                    🌐 Navegación
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Products Tab -->
+            <div id="products-tab" class="tab-panel active">
+                <iframe src="{{ url_for('static', filename='modules/products/products.html') }}" 
+                        frameborder="0" 
+                        width="100%" 
+                        height="100%">
+                </iframe>
+            </div>
+
+            <!-- AI Generator Tab -->
+            <div id="ai-generator-tab" class="tab-panel">
+                <iframe src="{{ url_for('static', filename='modules/ai_generator/generator.html') }}" 
+                        frameborder="0" 
+                        width="100%" 
+                        height="100%">
+                </iframe>
+            </div>
+
+            <!-- Navigation Tab -->
+            <div id="navigation-tab" class="tab-panel">
+                <iframe src="{{ url_for('static', filename='modules/navigation/navigation.html') }}" 
+                        frameborder="0" 
+                        width="100%" 
+                        height="100%">
+                </iframe>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-info">
+                <span>© 2024 STEL Shop Manager | Desarrollado para Stelorder</span>
+            </div>
+            <div class="footer-actions">
+                <button onclick="showHelp()" class="btn btn-small">❓ Ayuda</button>
+                <button onclick="showAbout()" class="btn btn-small">ℹ️ Acerca de</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>❓ Ayuda - STEL Shop Manager</h2>
+                <span class="close" onclick="closeModal('help-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h3>🚀 Inicio Rápido</h3>
+                <ol>
+                    <li><strong>Conectar MySQL:</strong> Ve a la pestaña Productos y conecta la base de datos</li>
+                    <li><strong>Configurar IA:</strong> En la pestaña Generador IA, ingresa tu API key de Google</li>
+                    <li><strong>Iniciar Chrome:</strong> En Navegación, inicia el navegador y haz login en Stelorder</li>
+                    <li><strong>Seleccionar productos:</strong> Filtra y selecciona los productos a procesar</li>
+                    <li><strong>Procesar:</strong> Haz clic en "Procesar Seleccionados"</li>
+                </ol>
+
+                <h3>📋 Flujo de Trabajo</h3>
+                <p>1. <strong>Productos</strong> → 2. <strong>Generador IA</strong> → 3. <strong>Navegación</strong></p>
+
+                <h3>🔧 Configuración</h3>
+                <ul>
+                    <li><strong>Base de datos:</strong> config/database_config.json</li>
+                    <li><strong>Navegador:</strong> config/browser_config.json</li>
+                    <li><strong>API Keys:</strong> Se guardan localmente</li>
+                </ul>
+
+                <h3>⚡ Atajos</h3>
+                <ul>
+                    <li><kbd>Ctrl+S</kbd>: Guardar selección</li>
+                    <li><kbd>Ctrl+F</kbd>: Buscar productos</li>
+                    <li><kbd>Space</kbd>: Pausar/Reanudar proceso</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

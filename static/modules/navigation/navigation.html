@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navegación - STEL Shop</title>
+    <link rel="stylesheet" href="navigation.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 Módulo de Navegación</h1>
+            <p>Control del navegador y automatización de Stelorder</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Panel de Estado del Navegador -->
+            <section class="browser-status-section">
+                <h2>📊 Estado del Navegador</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">Estado:</span>
+                        <span id="browser-state" class="status-value">No iniciado</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">URL Actual:</span>
+                        <span id="current-url" class="status-value">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Login:</span>
+                        <span id="login-status" class="status-value">No verificado</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Tiempo activo:</span>
+                        <span id="uptime" class="status-value">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Controles del Navegador -->
+            <section class="browser-controls-section">
+                <h2>🎮 Control del Navegador</h2>
+                <div class="control-buttons">
+                    <button id="start-browser" onclick="startBrowser()" class="btn btn-primary">
+                        🚀 Iniciar Navegador
+                    </button>
+                    <button id="check-login" onclick="checkLogin()" class="btn btn-secondary" disabled>
+                        🔍 Verificar Login
+                    </button>
+                    <button id="confirm-login" onclick="confirmLogin()" class="btn btn-success" disabled>
+                        ✅ Confirmar Login
+                    </button>
+                    <button id="close-browser" onclick="closeBrowser()" class="btn btn-danger" disabled>
+                        ❌ Cerrar Navegador
+                    </button>
+                </div>
+                
+                <div class="browser-actions">
+                    <button onclick="refreshPage()" class="btn btn-small" disabled>🔄 Refrescar</button>
+                    <button onclick="takeScreenshot()" class="btn btn-small" disabled>📸 Screenshot</button>
+                    <button onclick="navigateToCatalog()" class="btn btn-small" disabled>📚 Ir a Catálogo</button>
+                </div>
+            </section>
+
+            <!-- Panel de Procesamiento -->
+            <section class="processing-section">
+                <h2>⚙️ Procesamiento de Productos</h2>
+                
+                <div class="processing-info">
+                    <div class="info-item">
+                        <label>Estado:</label>
+                        <span id="processing-status">Inactivo</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Tarea actual:</label>
+                        <span id="current-task">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Progreso:</label>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                        <span id="progress-text">0/0</span>
+                    </div>
+                </div>
+
+                <div class="processing-stats">
+                    <div class="stat-card success">
+                        <h3 id="products-success">0</h3>
+                        <p>Procesados</p>
+                    </div>
+                    <div class="stat-card error">
+                        <h3 id="products-failed">0</h3>
+                        <p>Errores</p>
+                    </div>
+                    <div class="stat-card info">
+                        <h3 id="products-remaining">0</h3>
+                        <p>Restantes</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="processing-time">00:00</h3>
+                        <p>Tiempo</p>
+                    </div>
+                </div>
+
+                <div class="processing-controls">
+                    <button id="pause-btn" onclick="togglePause()" class="btn btn-warning" disabled>
+                        ⏸️ Pausar
+                    </button>
+                    <button id="stop-btn" onclick="stopProcessing()" class="btn btn-danger" disabled>
+                        ⏹️ Detener
+                    </button>
+                    <button onclick="exportStats()" class="btn btn-secondary">
+                        📊 Exportar Estadísticas
+                    </button>
+                </div>
+            </section>
+
+            <!-- Log de Actividad -->
+            <section class="log-section">
+                <div class="section-header">
+                    <h2>📜 Registro de Actividad</h2>
+                    <div class="log-controls">
+                        <select id="log-filter" onchange="filterLogs()" title="Filtrar logs">
+                            <option value="all">Todos</option>
+                            <option value="INFO">Info</option>
+                            <option value="ERROR">Errores</option>
+                            <option value="DEBUG">Debug</option>
+                        </select>
+                        <button onclick="clearLogs()" class="btn btn-small">🗑️ Limpiar</button>
+                        <button onclick="downloadLogs()" class="btn btn-small">💾 Descargar</button>
+                    </div>
+                </div>
+                
+                <div id="log-container" class="log-container">
+                    <!-- Los logs se agregan dinámicamente aquí -->
+                </div>
+            </section>
+
+            <!-- Panel de Errores -->
+            <section id="errors-section" class="errors-section" style="display: none;">
+                <h2>❌ Errores Encontrados</h2>
+                <div id="errors-list" class="errors-list">
+                    <!-- Los errores se muestran aquí -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Modal de Screenshot -->
+        <div id="screenshot-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>📸 Captura de Pantalla</h2>
+                    <span class="close" onclick="closeModal('screenshot-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <img id="screenshot-image" src="" alt="Screenshot">
+                    <div class="screenshot-actions">
+                        <button onclick="downloadScreenshot()" class="btn btn-primary">💾 Descargar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="navigation.js"></script>
+</body>
+</html>

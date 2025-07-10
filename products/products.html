@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - STEL Shop</title>
+    <link rel="stylesheet" href="products.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 Módulo de Productos</h1>
+            <p>Gestión y selección de productos desde MySQL</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Panel de Conexión a Base de Datos -->
+            <section class="database-section">
+                <h2>🗄️ Base de Datos MySQL</h2>
+                <div class="db-info">
+                    <div class="db-status">
+                        <span class="status-indicator" id="db-status-indicator"></span>
+                        <span id="db-status-text">Desconectado</span>
+                    </div>
+                    <div class="db-details">
+                        <span id="db-info">Sin información</span>
+                    </div>
+                    <button id="connect-db" onclick="connectDatabase()" class="btn btn-primary">
+                        🔌 Conectar
+                    </button>
+                    <button onclick="refreshProducts()" class="btn btn-secondary" disabled>
+                        🔄 Actualizar
+                    </button>
+                </div>
+            </section>
+
+            <!-- Panel de Estadísticas -->
+            <section class="stats-section">
+                <h2>📊 Estadísticas</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="total-products">0</h3>
+                        <p>Total Productos</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="filtered-products">0</h3>
+                        <p>Filtrados</p>
+                    </div>
+                    <div class="stat-card selected">
+                        <h3 id="selected-products">0</h3>
+                        <p>Seleccionados</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="total-value">$0</h3>
+                        <p>Valor Total</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de Filtros -->
+            <section class="filters-section">
+                <div class="section-header">
+                    <h2>🔍 Filtros</h2>
+                    <div class="filter-actions">
+                        <button onclick="toggleAdvancedFilters()" class="btn btn-small">
+                            ⚙️ Avanzados
+                        </button>
+                        <button onclick="clearFilters()" class="btn btn-small">
+                            🗑️ Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Búsqueda rápida -->
+                <div class="search-bar">
+                    <input type="text" id="quick-search" placeholder="Buscar por SKU, descripción, modelo... (soporta búsqueda avanzada: familia:generadores stock:>10)">
+                    <button onclick="quickSearch()" class="btn btn-primary">🔍 Buscar</button>
+                </div>
+
+                <!-- Filtros básicos -->
+                <div class="basic-filters">
+                    <div class="filter-group">
+                        <label>Familia:</label>
+                        <select id="filter-familia" onchange="applyFilters()" title="Filtrar por familia">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Marca:</label>
+                        <select id="filter-marca" onchange="applyFilters()" title="Filtrar por marca">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Stock:</label>
+                        <select id="filter-stock" onchange="applyFilters()" title="Filtrar por stock">
+                            <option value="">Todos</option>
+                            <option value="con_stock">Con Stock</option>
+                            <option value="sin_stock">Sin Stock</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Precio:</label>
+                        <input type="number" id="filter-precio-min" placeholder="Min" onchange="applyFilters()">
+                        <input type="number" id="filter-precio-max" placeholder="Max" onchange="applyFilters()">
+                    </div>
+                </div>
+
+                <!-- Filtros avanzados (ocultos por defecto) -->
+                <div id="advanced-filters" class="advanced-filters" style="display: none;">
+                    <div class="filter-group">
+                        <label>Potencia (KVA):</label>
+                        <input type="number" id="filter-potencia-min" placeholder="Min">
+                        <input type="number" id="filter-potencia-max" placeholder="Max">
+                    </div>
+                    <div class="filter-group">
+                        <label>Características:</label>
+                        <label class="checkbox">
+                            <input type="checkbox" id="filter-cabina"> Con Cabina
+                        </label>
+                        <label class="checkbox">
+                            <input type="checkbox" id="filter-tta"> Con TTA
+                        </label>
+                    </div>
+                    <div class="filter-group">
+                        <label>Combustible:</label>
+                        <select id="filter-combustible" title="Filtrar por combustible">
+                            <option value="">Todos</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="nafta">Nafta</option>
+                            <option value="gas">Gas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filtros guardados -->
+                <div class="saved-filters">
+                    <label>Filtros guardados:</label>
+                    <select id="saved-filters" onchange="loadSavedFilter()" title="Cargar filtro guardado">
+                        <option value="">Seleccionar...</option>
+                        <optgroup label="Predefinidos">
+                            <option value="preset:en_stock">En Stock</option>
+                            <option value="preset:sin_stock">Sin Stock</option>
+                            <option value="preset:generadores_diesel">Generadores Diesel</option>
+                            <option value="preset:alta_potencia">Alta Potencia (>100KVA)</option>
+                        </optgroup>
+                        <optgroup label="Personalizados" id="custom-filters-group">
+                        </optgroup>
+                    </select>
+                    <button onclick="saveCurrentFilter()" class="btn btn-small">💾 Guardar</button>
+                </div>
+
+                <!-- Resumen de filtros activos -->
+                <div id="filter-summary" class="filter-summary" style="display: none;">
+                    <span id="filter-summary-text"></span>
+                </div>
+            </section>
+
+            <!-- Panel de Productos -->
+            <section class="products-section">
+                <div class="section-header">
+                    <h2>📋 Lista de Productos</h2>
+                    <div class="table-actions">
+                        <button onclick="selectAll(true)" class="btn btn-small">✅ Todos</button>
+                        <button onclick="selectAll(false)" class="btn btn-small">❌ Ninguno</button>
+                        <button onclick="invertSelection()" class="btn btn-small">🔄 Invertir</button>
+                        <button onclick="selectByFilter()" class="btn btn-small">🎯 Por Filtro</button>
+                    </div>
+                </div>
+
+                <!-- Tabla de productos -->
+                <div class="table-container">
+                    <table id="products-table" class="products-table">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-column">
+                                    <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll()">
+                                </th>
+                                <th onclick="sortTable('SKU')">SKU <span class="sort-indicator"></span></th>
+                                <th onclick="sortTable('Descripción')">Descripción <span class="sort-indicator"></span></th>
+                                <th onclick="sortTable('Marca')">Marca <span class="sort-indicator"></span></th>
+                                <th onclick="sortTable('Familia')">Familia <span class="sort-indicator"></span></th>
+                                <th onclick="sortTable('Stock')" class="numeric">Stock <span class="sort-indicator"></span></th>
+                                <th onclick="sortTable('Precio_USD_con_IVA')" class="numeric">Precio USD <span class="sort-indicator"></span></th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody">
+                            <!-- Productos se cargan dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                <div class="pagination">
+                    <button onclick="previousPage()" class="btn btn-small" disabled>⬅️ Anterior</button>
+                    <span id="page-info">Página 1 de 1</span>
+                    <button onclick="nextPage()" class="btn btn-small" disabled>Siguiente ➡️</button>
+                    <select id="items-per-page" onchange="changePageSize()">
+                        <option value="25">25 por página</option>
+                        <option value="50">50 por página</option>
+                        <option value="100">100 por página</option>
+                        <option value="all">Todos</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Panel de Acciones -->
+            <section class="actions-section">
+                <h2>🚀 Acciones</h2>
+                <div class="actions-grid">
+                    <div class="action-group">
+                        <h3>Selección</h3>
+                        <button onclick="saveSelection()" class="btn btn-secondary">
+                            💾 Guardar Selección
+                        </button>
+                        <button onclick="loadSelection()" class="btn btn-secondary">
+                            📂 Cargar Selección
+                        </button>
+                        <button onclick="exportSelection()" class="btn btn-secondary">
+                            📤 Exportar
+                        </button>
+                    </div>
+                    
+                    <div class="action-group">
+                        <h3>Procesamiento</h3>
+                        <button onclick="processSelected()" class="btn btn-success" id="process-button" disabled>
+                            ⚡ Procesar Seleccionados
+                        </button>
+                        <button onclick="previewSelected()" class="btn btn-primary">
+                            👁️ Vista Previa
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Modal de Detalles del Producto -->
+        <div id="product-details-modal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2>📋 Detalles del Producto</h2>
+                    <span class="close" onclick="closeModal('product-details-modal')">&times;</span>
+                </div>
+                <div class="modal-body" id="product-details-content">
+                    <!-- Contenido dinámico -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Vista Previa -->
+        <div id="preview-modal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2>👁️ Vista Previa de Selección</h2>
+                    <span class="close" onclick="closeModal('preview-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="preview-summary"></div>
+                    <div id="preview-list"></div>
+                    <div class="modal-actions">
+                        <button onclick="confirmProcessing()" class="btn btn-success">
+                            ✅ Confirmar y Procesar
+                        </button>
+                        <button onclick="closeModal('preview-modal')" class="btn btn-secondary">
+                            ❌ Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Guardar Filtro -->
+        <div id="save-filter-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>💾 Guardar Filtro</h2>
+                    <span class="close" onclick="closeModal('save-filter-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <label>Nombre del filtro:</label>
+                    <input type="text" id="filter-name" placeholder="Ej: Generadores en stock" title="Nombre del filtro">
+                    <div class="modal-actions">
+                        <button onclick="confirmSaveFilter()" class="btn btn-primary">Guardar</button>
+                        <button onclick="closeModal('save-filter-modal')" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="products.js"></script>
+</body>
+</html>

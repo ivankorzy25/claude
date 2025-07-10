@@ -1,0 +1,414 @@
+/* Estilos para el Módulo de Generación con IA */
+
+:root {
+    --primary-color: #ff6600;
+    --secondary-color: #ffcc00;
+    --success-color: #52c41a;
+    --warning-color: #faad14;
+    --danger-color: #ff4d4f;
+    --dark-color: #333;
+    --light-bg: #f9f9f9;
+    --border-radius: 10px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: var(--dark-color);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    background: var(--primary-color);
+    color: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+header h1 {
+    margin-bottom: 10px;
+}
+
+.main-content {
+    display: grid;
+    gap: 30px;
+}
+
+/* Secciones */
+section {
+    background: white;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    color: var(--primary-color);
+}
+
+/* Configuración de IA */
+.config-group {
+    margin-bottom: 15px;
+}
+
+.config-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.status-indicator {
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.status-indicator.success {
+    background: #d4f8d4;
+    color: var(--success-color);
+}
+
+.status-indicator.error {
+    background: #ffe4e4;
+    color: var(--danger-color);
+}
+
+/* Editor de Prompts */
+.prompt-controls {
+    display: flex;
+    gap: 10px;
+}
+
+#version-selector {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: white;
+}
+
+.prompt-info {
+    background: var(--light-bg);
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.editor-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+#prompt-editor {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    resize: vertical;
+}
+
+#prompt-editor:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.editor-toolbar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.save-controls {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.save-controls input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Preview Section */
+.preview-controls {
+    margin-bottom: 15px;
+}
+
+.preview-controls select {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.preview-box {
+    border: 2px solid #ddd;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    min-height: 400px;
+    overflow-y: auto;
+    background: var(--light-bg);
+}
+
+.preview-box .placeholder {
+    text-align: center;
+    color: #999;
+    padding: 50px;
+}
+
+/* Product Types */
+.product-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.product-type-card {
+    background: var(--light-bg);
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.product-type-card h4 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.product-type-card .keywords {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+/* Botones */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.btn-warning {
+    background: var(--warning-color);
+    color: white;
+}
+
+.btn-small {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Modales */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: var(--border-radius);
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 20px;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    opacity: 0.8;
+}
+
+/* Version List */
+.version-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.version-item {
+    background: var(--light-bg);
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.version-item:hover {
+    border-color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.version-item h4 {
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.version-item .date {
+    font-size: 12px;
+    color: #666;
+}
+
+.version-item .description {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.version-item .actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Variables Grid */
+.variables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.variable-item {
+    background: var(--light-bg);
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.variable-item:hover {
+    border-color: var(--primary-color);
+    background: #fff3e0;
+}
+
+.variable-item code {
+    display: block;
+    font-size: 14px;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.variable-item small {
+    color: #666;
+}
+
+/* Utilidades */
+.text-muted {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .save-controls {
+        grid-template-columns: 1fr;
+    }
+    
+    .prompt-controls {
+        flex-direction: column;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}

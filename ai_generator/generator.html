@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador IA - STEL Shop</title>
+    <link rel="stylesheet" href="generator.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Módulo de Generación con IA</h1>
+            <p>Gestión de prompts y generación de descripciones HTML</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Panel de Configuración de IA -->
+            <section class="config-section">
+                <h2>⚙️ Configuración de IA</h2>
+                <div class="config-group">
+                    <label for="api-key">API Key de Google Gemini:</label>
+                    <div class="input-group">
+                        <input type="password" id="api-key" placeholder="AIza...">
+                        <button onclick="validateApiKey()" class="btn btn-primary">Validar</button>
+                    </div>
+                    <small>Obtén tu API key en: <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a></small>
+                </div>
+                <div id="api-status" class="status-indicator"></div>
+            </section>
+
+            <!-- Editor de Prompts -->
+            <section class="prompt-section">
+                <div class="section-header">
+                    <h2>📝 Editor de Prompts</h2>
+                    <div class="prompt-controls">
+                        <select id="version-selector" onchange="loadPromptVersion()" title="Seleccionar versión de prompt">
+                            <option value="base">Prompt Base</option>
+                        </select>
+                        <button onclick="showVersionHistory()" class="btn btn-secondary">📚 Historial</button>
+                    </div>
+                </div>
+
+                <div class="prompt-info">
+                    <span id="current-version-name">Prompt Base Original</span>
+                    <span id="current-version-date" class="text-muted"></span>
+                </div>
+
+                <div class="editor-container">
+                    <textarea id="prompt-editor" rows="15" placeholder="Escribe tu prompt aquí..."></textarea>
+                    <div class="editor-toolbar">
+                        <button onclick="formatPrompt()" class="btn btn-small">🎨 Formatear</button>
+                        <button onclick="insertVariable()" class="btn btn-small">🏷️ Variables</button>
+                        <button onclick="showPromptHelp()" class="btn btn-small">❓ Ayuda</button>
+                    </div>
+                </div>
+
+                <div class="save-controls">
+                    <input type="text" id="version-name" placeholder="Nombre de la versión">
+                    <input type="text" id="version-description" placeholder="Descripción de cambios">
+                    <button onclick="savePromptVersion()" class="btn btn-success">💾 Guardar Nueva Versión</button>
+                    <button onclick="updateBasePrompt()" class="btn btn-warning">🔄 Actualizar Base</button>
+                </div>
+            </section>
+
+            <!-- Panel de Previsualización -->
+            <section class="preview-section">
+                <div class="section-header">
+                    <h2>👁️ Previsualización</h2>
+                    <button onclick="generatePreview()" class="btn btn-primary">🔄 Generar Preview</button>
+                </div>
+
+                <div class="preview-controls">
+                    <label for="example-product">Producto de ejemplo:</label>
+                    <select id="example-product" title="Seleccionar producto de ejemplo">
+                        <option value="generador">Grupo Electrógeno 100KVA</option>
+                        <option value="compresor">Compresor 150 PSI</option>
+                        <option value="motobomba">Motobomba 3"</option>
+                        <option value="custom">Personalizado...</option>
+                    </select>
+                </div>
+
+                <div id="preview-container" class="preview-box">
+                    <p class="placeholder">Haz clic en "Generar Preview" para ver una vista previa</p>
+                </div>
+            </section>
+
+            <!-- Panel de Configuración de Tipos de Producto -->
+            <section class="product-types-section">
+                <h2>🏷️ Tipos de Producto</h2>
+                <div id="product-types-list" class="product-types-grid">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <button onclick="addProductType()" class="btn btn-secondary">➕ Agregar Tipo</button>
+            </section>
+        </div>
+
+        <!-- Modal de Historial de Versiones -->
+        <div id="version-history-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>📚 Historial de Versiones</h2>
+                    <span class="close" onclick="closeModal('version-history-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="version-list" class="version-list">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Variables -->
+        <div id="variables-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🏷️ Variables Disponibles</h2>
+                    <span class="close" onclick="closeModal('variables-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="variables-grid">
+                        <div class="variable-item" onclick="copyVariable('{nombre}')">
+                            <code>{nombre}</code>
+                            <small>Nombre del producto</small>
+                        </div>
+                        <div class="variable-item" onclick="copyVariable('{marca}')">
+                            <code>{marca}</code>
+                            <small>Marca del producto</small>
+                        </div>
+                        <div class="variable-item" onclick="copyVariable('{modelo}')">
+                            <code>{modelo}</code>
+                            <small>Modelo</small>
+                        </div>
+                        <div class="variable-item" onclick="copyVariable('{potencia_kva}')">
+                            <code>{potencia_kva}</code>
+                            <small>Potencia en KVA</small>
+                        </div>
+                        <div class="variable-item" onclick="copyVariable('{motor}')">
+                            <code>{motor}</code>
+                            <small>Información del motor</small>
+                        </div>
+                        <div class="variable-item" onclick="copyVariable('{product_type}')">
+                            <code>{product_type}</code>
+                            <small>Tipo de producto detectado</small>
+                        </div>
+                        <div class="variable-item" onclick="copyVariable('{tech_specs}')">
+                            <code>{tech_specs}</code>
+                            <small>Especificaciones técnicas</small>
+                        </div>
+                        <div class="variable-item" onclick="copyVariable('{applications}')">
+                            <code>{applications}</code>
+                            <small>Aplicaciones típicas</small>
+                        </div>
+                        <div class="variable-item" onclick="copyVariable('{focus_areas}')">
+                            <code>{focus_areas}</code>
+                            <small>Áreas de enfoque</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="generator.js"></script>
+</body>
+</html>
