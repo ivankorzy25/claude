@@ -18,6 +18,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Manejar atajos de teclado
     setupKeyboardShortcuts();
+
+    // Enviar mensaje al módulo de productos para que se conecte a la DB
+    const productsIframe = document.getElementById('products-tab').querySelector('iframe');
+    if (productsIframe) {
+        let connectInterval = setInterval(function() {
+            if (productsIframe.contentWindow && productsIframe.contentWindow.connectDatabase) {
+                productsIframe.contentWindow.connectDatabase();
+                clearInterval(connectInterval); // Detener el intervalo una vez que la función esté disponible
+            }
+        }, 1000); // Intentar cada segundo
+    }
 });
 
 // Gestión de pestañas
@@ -40,6 +51,13 @@ function openTab(tabName) {
     if (activeButton) activeButton.classList.add('active');
     
     appState.currentTab = tabName;
+}
+
+function connectProductsDB() {
+    const productsIframe = document.getElementById('products-tab').querySelector('iframe');
+    if (productsIframe && productsIframe.contentWindow) {
+        productsIframe.contentWindow.postMessage({ type: 'connect_db' }, window.location.origin);
+    }
 }
 
 // Verificar estado del sistema

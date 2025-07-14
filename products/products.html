@@ -3,302 +3,736 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos - STEL Shop</title>
-    <link rel="stylesheet" href="products.css">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Catálogo KOR - Sistema de Gestión de Productos</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+    :root {
+        --primary-color: #000000;
+        --secondary-color: #FF6B35;
+        --accent-color: #FFD23F;
+        --success-color: #27ae60;
+        --info-color: #3498db;
+        --warning-color: #FFD23F;
+        --danger-color: #e74c3c;
+        --dark-color: #1a1a1a;
+        --light-color: #f8f9fa;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #FFD23F 0%, #FF6B35 50%, #000000 100%);
+        color: #333;
+        min-height: 100vh;
+    }
+
+    .navbar {
+        background: linear-gradient(90deg, var(--primary-color) 0%, #1a1a1a 100%);
+        box-shadow: 0 4px 10px rgba(0,0,0,.3);
+        border-bottom: 3px solid var(--secondary-color);
+    }
+
+    .navbar-brand {
+        font-weight: 900;
+        color: var(--accent-color) !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+    }
+
+    /* Panel de Cotización */
+    .cotizacion-panel {
+        background: rgba(255, 215, 63, 0.9);
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        border: 2px solid var(--secondary-color);
+    }
+
+    .cotizacion-panel .cotizacion-label {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+    }
+
+    .cotizacion-panel .cotizacion-valor {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: var(--secondary-color);
+        min-width: 120px;
+    }
+
+    .cotizacion-panel input[type="date"] {
+        background: white;
+        border: 2px solid var(--secondary-color);
+        border-radius: 5px;
+        padding: 0.25rem 0.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .cotizacion-panel .btn-cotizacion {
+        background: var(--secondary-color);
+        color: white;
+        border: none;
+        padding: 0.25rem 1rem;
+        border-radius: 5px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .cotizacion-panel .btn-cotizacion:hover {
+        background: #ff8c5a;
+        transform: translateY(-2px);
+    }
+
+    .cotizacion-spinner {
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-left-color: var(--secondary-color);
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Ajustes para el header */
+    .header-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #222 100%);
+        color: white;
+        padding: 1rem 0;
+        margin-bottom: 1.5rem;
+        border-bottom: 3px solid var(--secondary-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-section::before {
+        content: "";
+        position: absolute;
+        top: -25%;
+        right: -5%;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%);
+        opacity: 0.1;
+    }
+
+    .header-section h1 {
+        font-weight: 600;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+        font-size: 1.75rem;
+    }
+
+    /* Ajustes para cotización en modal */
+    .modal-cotizacion-info {
+        background: linear-gradient(135deg, #FFD23F 0%, #FF6B35 100%);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .modal-cotizacion-info .cotizacion-title {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-cotizacion-info .cotizacion-value {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .modal-cotizacion-info .cotizacion-date {
+        font-size: 0.8rem;
+        color: var(--primary-color);
+        margin-top: 0.5rem;
+    }
+
+    .filter-card, .stats-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,.2);
+        border: 2px solid transparent;
+        background-image: linear-gradient(white, white), 
+                          linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        transition: all 0.3s ease;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,.2);
+    }
+
+    .filter-card:hover, .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(255, 107, 53, 0.3);
+    }
+
+    .stats-card {
+        background: white;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, var(--primary-color), #333);
+        border: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #333, var(--primary-color));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+    }
+
+    .btn-success {
+        background: linear-gradient(45deg, var(--secondary-color), #ff8c5a);
+        border: none;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(45deg, #ff8c5a, var(--secondary-color));
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid var(--accent-color);
+        color: var(--primary-color);
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--accent-color);
+        border-color: var(--accent-color);
+        color: var(--primary-color);
+    }
+
+    .table th {
+        background: linear-gradient(90deg, var(--primary-color), #333);
+        color: var(--accent-color);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        padding: 1rem 0.5rem;
+        border: none;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(255, 215, 63, 0.05);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 107, 53, 0.1);
+    }
+
+    .badge-stock {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+        font-weight: 700;
+    }
+
+    .categoria-badge {
+        background: linear-gradient(45deg, var(--secondary-color), var(--accent-color)) !important;
+        color: var(--primary-color) !important;
+        font-weight: 700;
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, var(--primary-color), #333);
+        color: var(--accent-color);
+        border-bottom: 3px solid var(--secondary-color);
+    }
+
+    .modal-header .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(45deg, var(--secondary-color), var(--accent-color)) !important;
+        color: var(--primary-color) !important;
+        border: 1px solid var(--secondary-color) !important;
+        font-weight: 700;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: var(--accent-color) !important;
+        color: var(--primary-color) !important;
+        border-color: var(--accent-color) !important;
+    }
+
+    .loading-overlay {
+        background: rgba(0,0,0,0.9);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .spinner-wrapper {
+        text-align: center;
+        color: white;
+    }
+
+    .spinner-border {
+        border-color: var(--accent-color);
+        border-right-color: var(--secondary-color);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25);
+    }
+
+    .bg-warning {
+        background: var(--accent-color) !important;
+        color: var(--primary-color) !important;
+    }
+
+    /* Estilos Carrusel Modal Detalles */
+    #productImageCarousel .carousel-inner img {
+        max-height: 250px;
+        object-fit: contain;
+        border-radius: 0.375rem;
+    }
+
+    .product-image-container {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    #productImageCarousel {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    #productImageCarousel .carousel-indicators {
+        bottom: 5px;
+    }
+
+    #productImageCarousel .carousel-indicators button {
+        background-color: rgba(0, 0, 0, 0.5);
+        border: none;
+    }
+
+    #productImageCarousel .carousel-indicators button.active {
+        background-color: var(--secondary-color);
+    }
+
+    #productImageCarousel .carousel-control-prev,
+    #productImageCarousel .carousel-control-next {
+        background: rgba(0, 0, 0, 0.3);
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    #productImageCarousel .carousel-control-prev {
+        left: 10px;
+    }
+
+    #productImageCarousel .carousel-control-next {
+        right: 10px;
+    }
+
+    #productImageCarousel .carousel-control-prev:hover,
+    #productImageCarousel .carousel-control-next:hover {
+        background: rgba(0, 0, 0, 0.6);
+    }
+    
+    .modal-body .table td {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .modal-body h6 {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .security-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.875rem;
+        margin-left: 1rem;
+    }
+
+    .security-enabled {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .security-disabled {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    /* Estilos para los controles de ajuste */
+    .controles-ajuste-precios .input-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .controles-ajuste-precios input[type="number"] {
+        max-width: 80px;
+    }
+
+    .controles-ajuste-precios .form-text {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    /* Animación suave para cambios de precio */
+    .precio-venta-sin-iva,
+    .precio-venta-con-iva,
+    .precio-venta-ars-sin-iva,
+    .precio-venta-ars-con-iva {
+        transition: all 0.3s ease;
+    }
+
+    /* Resaltar cuando hay ajustes activos */
+    .controles-ajuste-precios input[type="number"]:not([value="0"]) {
+        background-color: #fffbf0;
+        border-color: #FF6B35;
+    }
+</style>
 </head>
 <body>
-    <!-- Overlay de carga -->
-    <div id="loading-overlay" class="loading-overlay">
-        <div class="spinner-wrapper">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Cargando...</span>
+    <!-- Contenido Principal -->
+    <div class="main-content" id="mainContent">
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner-wrapper">
+                <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-3">Procesando datos...</p>
             </div>
-            <p class="mt-3">Cargando productos...</p>
         </div>
-    </div>
 
-    <div class="container">
-        <header>
-            <h1>📦 Módulo de Productos</h1>
-            <p>Gestión y selección de productos desde MySQL</p>
-        </header>
+        <div class="header-section text-center">
+            <div class="container">
+                <h1 class="mb-1 mt-1">Sistema de Gestión de Productos KOR</h1>
+                <span id="securityStatus" class="security-status security-disabled">
+                    <i class="fas fa-unlock me-1"></i>Sin Protección
+                </span>
+            </div>
+        </div>
 
-        <div class="main-content">
-            <!-- Panel de Conexión a Base de Datos -->
-            <section class="database-section">
-                <h2>🗄️ Base de Datos MySQL</h2>
-                <div class="db-info">
-                    <div class="db-status">
-                        <span class="status-indicator" id="db-status-indicator"></span>
-                        <span id="db-status-text">Desconectado</span>
-                    </div>
-                    <div class="db-details">
-                        <span id="db-info">Sin información</span>
-                    </div>
-                    <button id="connect-db" onclick="connectDatabase()" class="btn btn-primary">
-                        🔌 Conectar
-                    </button>
-                    <button onclick="refreshProducts()" class="btn btn-secondary" disabled>
-                        🔄 Actualizar
-                    </button>
-                </div>
-            </section>
-
-            <!-- Panel de Estadísticas -->
-            <section class="stats-section">
-                <h2>📊 Estadísticas</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3 id="total-products">0</h3>
-                        <p>Total Productos</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="filtered-products">0</h3>
-                        <p>Filtrados</p>
-                    </div>
-                    <div class="stat-card selected">
-                        <h3 id="selected-products">0</h3>
-                        <p>Seleccionados</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="total-value">$0</h3>
-                        <p>Valor Total</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Panel de Filtros -->
-            <section class="filters-section">
-                <div class="section-header">
-                    <h2>🔍 Filtros</h2>
-                    <div class="filter-actions">
-                        <button onclick="toggleAdvancedFilters()" class="btn btn-small">
-                            ⚙️ Avanzados
-                        </button>
-                        <button onclick="clearFilters()" class="btn btn-small">
-                            🗑️ Limpiar
+        <div class="container-fluid px-md-4">
+            <!-- Panel de Cotización integrado -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="cotizacion-panel" id="cotizacionPanel" style="display: none;">
+                        <span class="cotizacion-label">USD/ARS:</span>
+                        <span class="cotizacion-valor" id="cotizacionActual">
+                            <div class="cotizacion-spinner"></div>
+                        </span>
+                        <input type="date" id="fechaCotizacion" class="form-control form-control-sm" style="width: 150px;">
+                        <button class="btn btn-cotizacion btn-sm" onclick="actualizarCotizacion()" title="Actualizar cotización" aria-label="Actualizar cotización">
+                            <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Búsqueda rápida -->
-                <div class="search-bar">
-                    <input type="text" id="quick-search" placeholder="Buscar por SKU, descripción, modelo... (soporta búsqueda avanzada: familia:generadores stock:>10)">
-                    <button onclick="quickSearch()" class="btn btn-primary">🔍 Buscar</button>
-                </div>
-
-                <!-- Filtros básicos -->
-                <div class="basic-filters">
-                    <div class="filter-group">
-                        <label>Familia:</label>
-                        <select id="filter-familia" onchange="applyFilters()" title="Filtrar por familia">
-                            <option value="">Todas</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Marca:</label>
-                        <select id="filter-marca" onchange="applyFilters()" title="Filtrar por marca">
-                            <option value="">Todas</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Stock:</label>
-                        <select id="filter-stock" onchange="applyFilters()" title="Filtrar por stock">
-                            <option value="">Todos</option>
-                            <option value="con_stock">Con Stock</option>
-                            <option value="sin_stock">Sin Stock</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Precio:</label>
-                        <input type="number" id="filter-precio-min" placeholder="Min" onchange="applyFilters()">
-                        <input type="number" id="filter-precio-max" placeholder="Max" onchange="applyFilters()">
+            <div class="row mb-4" id="statisticsRow" style="display: none;">
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Productos</h6>
+                                <div class="stats-number" id="totalProductos">0</div>
+                            </div>
+                            <div class="text-primary opacity-50">
+                                <i class="fas fa-boxes fa-3x"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Filtros avanzados (ocultos por defecto) -->
-                <div id="advanced-filters" class="advanced-filters" style="display: none;">
-                    <div class="filter-group">
-                        <label>Potencia (KVA):</label>
-                        <input type="number" id="filter-potencia-min" placeholder="Min">
-                        <input type="number" id="filter-potencia-max" placeholder="Max">
-                    </div>
-                    <div class="filter-group">
-                        <label>Características:</label>
-                        <label class="checkbox">
-                            <input type="checkbox" id="filter-cabina"> Con Cabina
-                        </label>
-                        <label class="checkbox">
-                            <input type="checkbox" id="filter-tta"> Con TTA
-                        </label>
-                    </div>
-                    <div class="filter-group">
-                        <label>Combustible:</label>
-                        <select id="filter-combustible" title="Filtrar por combustible">
-                            <option value="">Todos</option>
-                            <option value="diesel">Diesel</option>
-                            <option value="nafta">Nafta</option>
-                            <option value="gas">Gas</option>
-                        </select>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Familias</h6>
+                                <div class="stats-number" id="totalFamilias">0</div>
+                            </div>
+                            <div class="text-info opacity-50">
+                                <i class="fas fa-tags fa-3x"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Filtros guardados -->
-                <div class="saved-filters">
-                    <label>Filtros guardados:</label>
-                    <select id="saved-filters" onchange="loadSavedFilter()" title="Cargar filtro guardado">
-                        <option value="">Seleccionar...</option>
-                        <optgroup label="Predefinidos">
-                            <option value="preset:en_stock">En Stock</option>
-                            <option value="preset:sin_stock">Sin Stock</option>
-                            <option value="preset:generadores_diesel">Generadores Diesel</option>
-                            <option value="preset:alta_potencia">Alta Potencia (>100KVA)</option>
-                        </optgroup>
-                        <optgroup label="Personalizados" id="custom-filters-group">
-                        </optgroup>
-                    </select>
-                    <button onclick="saveCurrentFilter()" class="btn btn-small">💾 Guardar</button>
-                </div>
-
-                <!-- Resumen de filtros activos -->
-                <div id="filter-summary" class="filter-summary" style="display: none;">
-                    <span id="filter-summary-text"></span>
-                </div>
-            </section>
-
-            <!-- Panel de Productos -->
-            <section class="products-section">
-                <div class="section-header">
-                    <h2>📋 Lista de Productos</h2>
-                    <div class="table-actions">
-                        <button onclick="selectAll(true)" class="btn btn-small">✅ Todos</button>
-                        <button onclick="selectAll(false)" class="btn btn-small">❌ Ninguno</button>
-                        <button onclick="invertSelection()" class="btn btn-small">🔄 Invertir</button>
-                        <button onclick="selectByFilter()" class="btn btn-small">🎯 Por Filtro</button>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">En Stock</h6>
+                                <div class="stats-number" id="totalStock">0</div>
+                            </div>
+                            <div class="text-success opacity-50">
+                                <i class="fas fa-check-circle fa-3x"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Sin Stock</h6>
+                                <div class="stats-number" id="totalSinStock">0</div>
+                            </div>
+                            <div class="text-danger opacity-50">
+                                <i class="fas fa-times-circle fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Tabla de productos -->
-                <div class="table-container">
-                    <table id="products-table" class="products-table">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="filter-card">
+                        <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filtros Avanzados</h5>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold" for="filtroFamilia">Familia</label>
+                                <select class="form-select" id="filtroFamilia">
+                                    <option value="">Todas las familias</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold" for="filtroMarca">Marca</label>
+                                <select class="form-select" id="filtroMarca">
+                                    <option value="">Todas las marcas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold" for="filtroCombustible">Combustible</label>
+                                <select class="form-select" id="filtroCombustible">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold" for="filtroStock">Stock</label>
+                                <select class="form-select" id="filtroStock">
+                                    <option value="">Todos</option>
+                                    <option value="Disponible">Disponible</option>
+                                    <option value="Sin Stock">Sin Stock</option>
+                                    <option value="Consultar">Consultar</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold" for="filtroCabina">Tipo de Cabina</label>
+                                <select class="form-select" id="filtroCabina">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold" for="filtroTTA">Con TTA</label>
+                                <select class="form-select" id="filtroTTA">
+                                    <option value="">Todos</option>
+                                    <option value="Si">Con TTA Incluido</option>
+                                    <option value="No">Sin TTA</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Rango de Precio (USD)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="precioMin" placeholder="Mín">
+                                    <span class="input-group-text">-</span>
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="precioMax" placeholder="Máx">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Rango de Potencia</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="potenciaMin" placeholder="Mín">
+                                    <select class="form-select flex-grow-0" id="unidadPotencia" style="max-width: 100px;" aria-label="Unidad de potencia">
+                                        <option value="">Unidad</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" for="busquedaTexto">Búsqueda por texto</label>
+                                <input type="text" class="form-control" id="busquedaTexto" placeholder="Buscar en modelo, descripción o características...">
+                            </div>
+                            <div class="col-md-6 mb-3 align-self-end">
+                                <div class="btn-group w-100" role="group">
+                                    <button class="btn btn-primary flex-fill" onclick="aplicarFiltros()">
+                                        <i class="fas fa-search me-2"></i>Buscar
+                                    </button>
+                                    <button class="btn btn-outline-secondary flex-fill" onclick="limpiarFiltros()">
+                                        <i class="fas fa-eraser me-2"></i>Limpiar
+                                    </button>
+                                    <button class="btn btn-info flex-fill" onclick="recargarDatosAlmacenados()">
+                                        <i class="fas fa-sync-alt me-2"></i>Re-cargar Datos
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Lista de Productos</h5>
+                    <div>
+                        <button class="btn btn-success btn-sm" onclick="mostrarModalExportacion()">
+                            <i class="fas fa-file-excel me-2"></i>Exportar Vista Actual
+                        </button>
+                        <button class="btn btn-info btn-sm" onclick="mostrarEstadisticas()">
+                            <i class="fas fa-chart-line me-2"></i>Estadísticas
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="productosTable" class="table table-striped table-hover w-100">
                         <thead>
                             <tr>
-                                <th class="checkbox-column">
-                                    <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll()">
-                                </th>
-                                <th onclick="sortTable('SKU')">SKU <span class="sort-indicator"></span></th>
-                                <th onclick="sortTable('Descripción')">Descripción <span class="sort-indicator"></span></th>
-                                <th onclick="sortTable('Marca')">Marca <span class="sort-indicator"></span></th>
-                                <th onclick="sortTable('Familia')">Familia <span class="sort-indicator"></span></th>
-                                <th onclick="sortTable('Stock')" class="numeric">Stock <span class="sort-indicator"></span></th>
-                                <th onclick="sortTable('Precio_USD_con_IVA')" class="numeric">Precio USD <span class="sort-indicator"></span></th>
+                                <th>Imagen</th>
+                                <th>Modelo</th>
+                                <th>Marca</th>
+                                <th>Potencia</th>
+                                <th>Motor</th>
+                                <th>Combustible</th>
+                                <th>Cabina</th>
+                                <th>TTA</th>
+                                <th>Precio USD</th>
+                                <th>Precio ARS</th>
+                                <th>Stock</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="products-tbody">
-                            <!-- Productos se cargan dinámicamente -->
+                        <tbody id="productosTableBody">
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Paginación -->
-                <div class="pagination">
-                    <button onclick="previousPage()" class="btn btn-small" disabled>⬅️ Anterior</button>
-                    <span id="page-info">Página 1 de 1</span>
-                    <button onclick="nextPage()" class="btn btn-small" disabled>Siguiente ➡️</button>
-                    <select id="items-per-page" onchange="changePageSize()">
-                        <option value="25">25 por página</option>
-                        <option value="50">50 por página</option>
-                        <option value="100">100 por página</option>
-                        <option value="all">Todos</option>
-                    </select>
-                </div>
-            </section>
-
-            <!-- Panel de Acciones -->
-            <section class="actions-section">
-                <h2>🚀 Acciones</h2>
-                <div class="actions-grid">
-                    <div class="action-group">
-                        <h3>Selección</h3>
-                        <button onclick="saveSelection()" class="btn btn-secondary">
-                            💾 Guardar Selección
-                        </button>
-                        <button onclick="loadSelection()" class="btn btn-secondary">
-                            📂 Cargar Selección
-                        </button>
-                        <button onclick="exportSelection()" class="btn btn-secondary">
-                            📤 Exportar
-                        </button>
-                    </div>
-                    
-                    <div class="action-group">
-                        <h3>Procesamiento</h3>
-                        <button onclick="processSelected()" class="btn btn-success" id="process-button" disabled>
-                            ⚡ Procesar Seleccionados
-                        </button>
-                        <button onclick="previewSelected()" class="btn btn-primary">
-                            👁️ Vista Previa
-                        </button>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Modal de Detalles del Producto -->
-        <div id="product-details-modal" class="modal">
-            <div class="modal-content large">
-                <div class="modal-header">
-                    <h2>📋 Detalles del Producto</h2>
-                    <span class="close" onclick="closeModal('product-details-modal')">&times;</span>
-                </div>
-                <div class="modal-body" id="product-details-content">
-                    <!-- Contenido dinámico -->
-                </div>
             </div>
         </div>
 
-        <!-- Modal de Vista Previa -->
-        <div id="preview-modal" class="modal">
-            <div class="modal-content large">
-                <div class="modal-header">
-                    <h2>👁️ Vista Previa de Selección</h2>
-                    <span class="close" onclick="closeModal('preview-modal')">&times;</span>
-                </div>
-                <div class="modal-body">
-                    <div id="preview-summary"></div>
-                    <div id="preview-list"></div>
-                    <div class="modal-actions">
-                        <button onclick="confirmProcessing()" class="btn btn-success">
-                            ✅ Confirmar y Procesar
+        <!-- Modal Detalles -->
+        <div class="modal fade" id="detallesModal" tabindex="-1" aria-labelledby="detallesModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detallesModalLabel">Detalles del Producto</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body" id="detallesModalBody">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-success" onclick="exportarProductoSeleccionadoExcel()">
+                            <i class="fas fa-file-excel me-2"></i>Exportar Excel
                         </button>
-                        <button onclick="closeModal('preview-modal')" class="btn btn-secondary">
-                            ❌ Cancelar
+                        <button type="button" class="btn btn-primary" onclick="imprimirModal()">
+                            <i class="fas fa-print me-2"></i>Imprimir
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal de Guardar Filtro -->
-        <div id="save-filter-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>💾 Guardar Filtro</h2>
-                    <span class="close" onclick="closeModal('save-filter-modal')">&times;</span>
-                </div>
-                <div class="modal-body">
-                    <label>Nombre del filtro:</label>
-                    <input type="text" id="filter-name" placeholder="Ej: Generadores en stock" title="Nombre del filtro">
-                    <div class="modal-actions">
-                        <button onclick="confirmSaveFilter()" class="btn btn-primary">Guardar</button>
-                        <button onclick="closeModal('save-filter-modal')" class="btn btn-secondary">Cancelar</button>
+        <!-- Modal Exportación -->
+        <div class="modal fade" id="exportacionModal" tabindex="-1" aria-labelledby="exportacionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exportacionModalLabel">Opciones de Exportación de Tabla</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tipo-export-selector">
+                            <h6>Seleccione el tipo de exportación:</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipoExportacion" id="exportCliente" value="cliente" checked>
+                                <label class="form-check-label" for="exportCliente">
+                                    <strong>Para Cliente</strong> - Información básica
+                                </label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="tipoExportacion" id="exportInterno" value="interno">
+                                <label class="form-check-label" for="exportInterno">
+                                    <strong>Uso Interno</strong> - Incluye costos y márgenes
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <h6>Formato de exportación:</h6>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" onclick="exportarTablaActualAExcel()">
+                                    <i class="fas fa-file-excel me-2"></i>Exportar a Excel (Vista Actual)
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
     <script src="products.js"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@
 /venv311/
 /.venv/
 *.venv
+.venv (1)/
 
 # Caché de Python
 __pycache__/
@@ -11,6 +12,7 @@ __pycache__/
 
 # Logs
 /logs/
+server.log
 
 # Archivos generados
 /exports/

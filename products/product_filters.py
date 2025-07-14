@@ -12,6 +12,7 @@ class FilterCriteria:
     """Criterios de filtrado para productos"""
     familia: Optional[str] = None
     marca: Optional[str] = None
+    stock: Optional[str] = None  # Mantener 'stock' para compatibilidad con frontend
     stock_min: Optional[int] = None
     stock_max: Optional[int] = None
     precio_min: Optional[float] = None
@@ -88,6 +89,17 @@ class ProductFilters:
         
         if criteria.stock_max is not None:
             filter_dict['stock_max'] = criteria.stock_max
+        
+        # Manejo del filtro 'stock' del frontend
+        if criteria.stock:
+            if criteria.stock == 'con_stock':
+                filter_dict['stock_min'] = 1
+            elif criteria.stock == 'sin_stock':
+                filter_dict['stock_max'] = 0
+            elif criteria.stock == 'disponible':
+                filter_dict['stock_disponible'] = True
+            elif criteria.stock == 'consultar':
+                filter_dict['stock_consultar'] = True
         
         if criteria.precio_min is not None:
             filter_dict['precio_min'] = criteria.precio_min

@@ -11,7 +11,7 @@ let moduleState = {
 };
 
 // URL del backend (ajustar según tu configuración)
-const API_BASE_URL = 'http://localhost:5001/api/ai-generator';
+const API_BASE_URL = 'http://localhost:5000/api/ai-generator';
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {

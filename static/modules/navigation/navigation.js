@@ -20,7 +20,7 @@ let statusTimer = null;
 let uptimeTimer = null;
 
 // URL del backend (ajustar según tu configuración)
-const API_BASE_URL = 'http://localhost:5001/api/navigation';
+const API_BASE_URL = 'http://localhost:5000/api/navigation';
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {

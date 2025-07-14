@@ -12,9 +12,9 @@ if ! command -v python3 &> /dev/null; then
 fi
 
 # Activar entorno virtual si existe
-if [ -f "venv/bin/activate" ]; then
-    echo "Activando entorno virtual..."
-    source venv/bin/activate
+if [ -f ".venv/bin/activate" ]; then
+    echo "Activando entorno virtual .venv..."
+    source .venv/bin/activate
 fi
 
 # Verificar instalación
@@ -28,4 +28,4 @@ fi
 
 # Ejecutar aplicación
 echo "Iniciando servidor..."
-python3 main.py
+"./.venv/bin/python" main.py

@@ -34,36 +34,82 @@ class ProductManager:
         if event_name in self.callbacks:
             self.callbacks[event_name] = callback
     
-    def connect_database(self) -> bool:
-        """Conecta a la base de datos"""
-        return self.db_handler.connect()
-    
-    def disconnect_database(self):
-        """Desconecta de la base de datos"""
-        self.db_handler.disconnect()
-    
+    def test_database_connection(self) -> bool:
+        """Prueba la conexión a la base de datos"""
+        return self.db_handler.test_connection()
+
     def refresh_products(self, use_filter: bool = True) -> pd.DataFrame:
-        """Refresca la lista de productos desde la base de datos"""
+        """Recarga la lista de productos desde la BD con manejo robusto de caché"""
         try:
+            self.logger.info(f"refresh_products: Iniciando recarga - use_filter={use_filter}")
+            
+            # Invalidar caché completamente
+            self.product_cache = pd.DataFrame()
+            
+            # Obtener datos desde la base de datos
             if use_filter and self.filters.current_filter != FilterCriteria():
+                self.logger.info(f"refresh_products: Aplicando filtros: {self.filters.current_filter.__dict__}")
                 filter_dict = self.filters.apply_filter(self.filters.current_filter)
                 self.product_cache = self.db_handler.get_products_filtered(filter_dict)
             else:
+                self.logger.info("refresh_products: Obteniendo todos los productos sin filtros")
                 self.product_cache = self.db_handler.get_all_products()
             
-            # Preparar DataFrame para compatibilidad
+            # Validar datos obtenidos
+            if self.product_cache.empty:
+                self.logger.warning("refresh_products: No se obtuvieron datos de la base de datos")
+                return pd.DataFrame()
+            
+            self.logger.info(f"refresh_products: Obtenidos {len(self.product_cache)} registros de la BD")
+            
+            # Validación adicional de calidad de datos
+            self._validate_data_quality()
+            
+            # Preparar DataFrame para la interfaz
             self.product_cache = self._prepare_dataframe(self.product_cache)
             
-            # Callback
+            # Notificar callback
             if self.callbacks['on_data_refresh']:
                 self.callbacks['on_data_refresh'](len(self.product_cache))
             
-            self.logger.info(f"Productos actualizados: {len(self.product_cache)} registros")
+            self.logger.info(f"refresh_products: Completado exitosamente - {len(self.product_cache)} productos listos")
             return self.product_cache
             
         except Exception as e:
-            self.logger.error(f"Error actualizando productos: {e}")
-            return pd.DataFrame()
+            self.logger.error(f"refresh_products: Error crítico: {e}")
+            import traceback
+            self.logger.error(f"refresh_products: Traceback: {traceback.format_exc()}")
+            # Retornar DataFrame vacío en caso de error
+            self.product_cache = pd.DataFrame()
+            return self.product_cache
+    
+    def _validate_data_quality(self):
+        """Valida la calidad de los datos obtenidos"""
+        if self.product_cache.empty:
+            return
+        
+        # Verificar que no haya filas con nombres de columnas como datos
+        header_rows = 0
+        for col in ['SKU', 'Descripción', 'Marca', 'Familia']:
+            if col in self.product_cache.columns:
+                header_rows += (self.product_cache[col] == col).sum()
+        
+        if header_rows > 0:
+            self.logger.warning(f"_validate_data_quality: Detectadas {header_rows} filas con nombres de columnas como datos")
+        
+        # Verificar diversidad de datos
+        unique_skus = self.product_cache['SKU'].nunique()
+        total_rows = len(self.product_cache)
+        
+        if unique_skus < total_rows * 0.8:  # Menos del 80% de SKUs únicos
+            self.logger.warning(f"_validate_data_quality: Baja diversidad de SKUs - {unique_skus}/{total_rows}")
+        
+        # Log de muestra de datos
+        if not self.product_cache.empty:
+            sample_size = min(3, len(self.product_cache))
+            for i in range(sample_size):
+                row = self.product_cache.iloc[i]
+                self.logger.info(f"_validate_data_quality: Muestra {i+1} - SKU: '{row.get('SKU')}', Desc: '{row.get('Descripción')[:50]}...'")
     
     def _prepare_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Prepara el DataFrame con columnas adicionales y formato"""

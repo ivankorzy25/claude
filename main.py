@@ -9,6 +9,7 @@ import webbrowser
 import threading
 import time
 from pathlib import Path
+from datetime import datetime
 
 # Agregar módulos al path
 sys.path.append(str(Path(__file__).parent))
@@ -16,6 +17,7 @@ sys.path.append(str(Path(__file__).parent))
 from flask import Flask, render_template, jsonify, request, send_file
 from flask_cors import CORS
 import logging
+import pandas as pd
 
 # Importar módulos
 from products.product_manager import ProductManager
@@ -85,50 +87,150 @@ def health():
 
 @app.route('/api/products/connect', methods=['POST'])
 def connect_database():
-    """Conectar a la base de datos MySQL"""
+    """Conectar a la base de datos MySQL con validación mejorada"""
     try:
-        success = product_manager.connect_database()
+        logger.info("🔄 Iniciando conexión a la base de datos...")
+        
+        # Limpiar estado previo
+        app_state['db_connected'] = False
+        product_manager.product_cache = pd.DataFrame()
+        
+        # Intentar conexión
+        success = product_manager.test_database_connection()
+        
         if success:
-            app_state['db_connected'] = True
+            logger.info("✅ Conexión a base de datos establecida")
+            
+            # Verificar configuración
             db_config = product_manager.db_handler.config
             instance_name = db_config.get("instance_connection_name", "Cloud SQL")
-            return jsonify({
-                'success': True,
-                'info': f"{db_config.get('database')}.{db_config.get('table')} @ {instance_name}"
-            })
+            database_name = db_config.get('database', 'N/A')
+            table_name = db_config.get('table', 'N/A')
+            
+            logger.info(f"📊 Configuración: {database_name}.{table_name} @ {instance_name}")
+            
+            # Obtener estadísticas y validar datos
+            try:
+                stats = product_manager.get_statistics()
+                total_products = stats.get('total_products', 0)
+                
+                # Hacer una consulta de prueba para validar datos
+                test_df = product_manager.refresh_products(use_filter=False)
+                valid_products = len(test_df)
+                
+                if valid_products > 0:
+                    app_state['db_connected'] = True
+                    logger.info(f"✅ Conexión validada: {total_products} productos totales, {valid_products} productos válidos")
+                    
+                    return jsonify({
+                        'success': True,
+                        'info': f"{database_name}.{table_name} @ {instance_name}",
+                        'details': {
+                            'database': database_name,
+                            'table': table_name,
+                            'instance': instance_name,
+                            'total_products': total_products,
+                            'valid_products': valid_products,
+                            'data_quality': f"{(valid_products/total_products*100):.1f}%" if total_products > 0 else "N/A",
+                            'connection_time': datetime.now().isoformat()
+                        }
+                    })
+                else:
+                    logger.warning("⚠️ Conexión establecida pero no se encontraron productos válidos")
+                    return jsonify({
+                        'success': False,
+                        'error': f'Conexión establecida pero no se encontraron productos válidos. Total en BD: {total_products}'
+                    })
+                    
+            except Exception as stats_error:
+                logger.error(f"❌ Error validando datos: {stats_error}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Conexión establecida pero error validando datos: {str(stats_error)}'
+                })
         else:
+            app_state['db_connected'] = False
+            logger.error("❌ Falló la conexión a la base de datos")
+            # Mensaje de error más genérico
+            connection_type = "Cloud SQL" if product_manager.db_handler.config.get("use_cloud_sql") else "MySQL local"
+            error_message = f"No se pudo conectar a la base de datos ({connection_type}). Verifica las credenciales y la configuración."
             return jsonify({
                 'success': False,
-                'error': 'No se pudo conectar a la base de datos. Revisa las credenciales y la configuración del conector.'
+                'error': error_message
             })
+            
     except Exception as e:
-        logger.error(f"Error conectando DB: {e}")
-        return jsonify({'success': False, 'error': str(e)})
+        app_state['db_connected'] = False
+        logger.error(f"❌ Error crítico conectando DB: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return jsonify({
+            'success': False, 
+            'error': f'Error crítico de conexión: {str(e)}'
+        })
 
 @app.route('/api/products/products', methods=['POST'])
 def get_products():
     """Obtener productos con filtros"""
     try:
+        # Verificar conexión primero
+        if not app_state['db_connected']:
+            return jsonify({
+                'success': False, 
+                'error': 'No hay conexión a la base de datos. Conecta primero.'
+            })
+        
         filters = request.json.get('filters', {})
         sort = request.json.get('sort', {})
         
+        logger.info(f"API /products: Filtros recibidos del frontend: {filters}")
+        logger.info(f"API /products: Ordenamiento recibido del frontend: {sort}")
+        
+        # Limpiar filtros vacíos
+        clean_filters = {k: v for k, v in filters.items() if v is not None and v != '' and v != []}
+        
         # Aplicar filtros si existen
-        if filters:
-            criteria = FilterCriteria(**filters)
-            df = product_manager.apply_filter(criteria)
+        if clean_filters:
+            try:
+                criteria = FilterCriteria(**clean_filters)
+                logger.info(f"API /products: FilterCriteria creado: {criteria.__dict__}")
+                df = product_manager.apply_filter(criteria)
+            except Exception as filter_error:
+                logger.error(f"Error creando FilterCriteria: {filter_error}")
+                # Fallback: cargar todos los productos
+                df = product_manager.refresh_products(use_filter=False)
         else:
-            df = product_manager.refresh_products()
+            logger.info("API /products: Sin filtros, cargando todos los productos")
+            df = product_manager.refresh_products(use_filter=False)
+        
+        logger.info(f"API /products: Productos devueltos después de filtro/refresh: {len(df)} registros")
+        
+        if df.empty:
+            logger.warning("API /products: DataFrame vacío devuelto")
+            return jsonify({
+                'success': True,
+                'products': [],
+                'message': 'No se encontraron productos con los filtros aplicados'
+            })
         
         # Convertir a lista de diccionarios
         products = df.to_dict('records')
         
         return jsonify({
             'success': True,
-            'products': products
+            'products': products,
+            'total_count': len(products),
+            'filters_applied': clean_filters
         })
+        
     except Exception as e:
         logger.error(f"Error obteniendo productos: {e}")
-        return jsonify({'success': False, 'error': str(e)})
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return jsonify({
+            'success': False, 
+            'error': f'Error interno: {str(e)}'
+        })
 
 @app.route('/api/products/filter-options')
 def get_filter_options():
@@ -196,6 +298,22 @@ def download_export(filename):
         return send_file(filepath, as_attachment=True)
     else:
         return "Archivo no encontrado", 404
+
+@app.route('/api/debug/filter-test', methods=['POST'])
+def debug_filter():
+    """Debug de filtros"""
+    try:
+        filters = request.json.get('filters', {})
+        criteria = FilterCriteria(**filters)
+        filter_dict = product_manager.filters.apply_filter(criteria)
+        
+        return jsonify({
+            'original_filters': filters,
+            'criteria_dict': criteria.__dict__,
+            'sql_filter_dict': filter_dict
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 # ============================================================================
 # API DE NAVEGACIÓN

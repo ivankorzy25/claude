@@ -6,6 +6,8 @@
     <title>STEL Shop Manager</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <!-- Incluir jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -19,6 +21,7 @@
                 <div class="status-item" id="db-status">
                     <span class="status-icon">🗄️</span>
                     <span class="status-text">MySQL: <span id="db-status-text">Desconectado</span></span>
+                    <button onclick="connectProductsDB()" class="btn btn-small">Conectar</button>
                 </div>
                 <div class="status-item" id="browser-status">
                     <span class="status-icon">🌐</span>

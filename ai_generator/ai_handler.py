@@ -26,14 +26,25 @@ class AIHandler:
             self.initialize_model(api_key)
     
     def initialize_model(self, api_key: str):
-        """Inicializa el modelo de Google Gemini"""
+        """Inicializa y valida el modelo de Google Gemini"""
         try:
             genai.configure(api_key=api_key)
+            
+            # Prueba de validación: listar modelos para confirmar que la clave es válida
+            # y la conexión funciona. Esto es más fiable que solo configurar.
+            models = [m for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+            if not models:
+                raise Exception("No se encontraron modelos compatibles para generar contenido.")
+
             # Intentar con el modelo más reciente
             self.model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            print("✅ Modelo de IA inicializado y validado correctamente.")
             return True
         except Exception as e:
-            print(f"Error inicializando modelo: {e}")
+            print(f"❌ Error inicializando o validando el modelo: {e}")
+            # Aquí es donde probablemente se captura el error de autenticación/proyecto
+            self.model = None
             return False
     
     def _load_product_types(self) -> Dict:
