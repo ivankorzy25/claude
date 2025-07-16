@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEL Shop Manager</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <style>
+        :root {
+            --primary-color: #ff6600;
+            --secondary-color: #6c757d;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --danger-color: #ff4d4f;
+            --info-color: #1890ff;
+            --dark-color: #333;
+            --light-bg: #f9f9f9;
+            --border-radius: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+        }
+
+        /* Header fijo */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--dark-color);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        /* Contenedor principal con margen para el header */
+        .main-container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Indicador de progreso */
+        .progress-indicator {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #ddd;
+            z-index: -1;
+        }
+
+        .step.completed::after {
+            background: var(--success-color);
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .step.active .step-circle {
+            background: var(--primary-color);
+        }
+
+        .step.completed .step-circle {
+            background: var(--success-color);
+        }
+
+        /* Secciones */
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .status-badge.ready {
+            background: #d4f8d4;
+            color: var(--success-color);
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: var(--warning-color);
+        }
+
+        .status-badge.error {
+            background: #ffe4e4;
+            color: var(--danger-color);
+        }
+
+        /* Mensajes de estado */
+        .status-message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Botones */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Tabla de productos */
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .products-table th,
+        .products-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .products-table th {
+            background: var(--light-bg);
+            font-weight: bold;
+            position: sticky;
+            top: 80px;
+            z-index: 10;
+        }
+
+        .products-table tr:hover {
+            background: #fafafa;
+        }
+
+        .products-table tr.selected {
+            background: #fff3e0;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+        }
+
+        .loading-spinner {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Log container */
+        .log-container {
+            background: #1e1e1e;
+            color: #e0e0e0;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+        }
+
+        .log-entry.info { color: #73d13d; }
+        .log-entry.error { color: #ff7875; }
+        .log-entry.success { color: #52c41a; }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Procesando...</p>
+        </div>
+    </div>
+
+    <!-- Header fijo -->
+    <header class="app-header">
+        <div>
+            <h1 style="margin: 0; font-size: 24px;">🏭 STEL Shop Manager</h1>
+            <span style="font-size: 12px; color: #999;">v{{ app_version }} ({{ build_number }})</span>
+        </div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <span id="global-status">Estado: Iniciando...</span>
+            <button onclick="processAll()" class="btn btn-success" id="process-all-btn" disabled>
+                ⚡ Procesar Todo
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Indicador de progreso -->
+        <div class="progress-indicator">
+            <div class="progress-steps">
+                <div class="step" id="step-navigation">
+                    <div class="step-circle">1</div>
+                    <div>Navegación</div>
+                </div>
+                <div class="step" id="step-ai">
+                    <div class="step-circle">2</div>
+                    <div>Configurar IA</div>
+                </div>
+                <div class="step" id="step-products">
+                    <div class="step-circle">3</div>
+                    <div>Seleccionar Productos</div>
+                </div>
+                <div class="step" id="step-process">
+                    <div class="step-circle">4</div>
+                    <div>Procesar</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PASO 1: Navegación -->
+        <section class="section" id="navigation-section">
+            <div class="section-header">
+                <h2>
+                    <span>🌐</span>
+                    <span>Paso 1: Control del Navegador</span>
+                </h2>
+                <span class="status-badge pending" id="nav-status">Pendiente</span>
+            </div>
+
+            <div class="status-message info" id="nav-message">
+                Inicia el navegador Chrome y haz login en Stelorder
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <h3>Control del Navegador</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                        <button onclick="startBrowser()" class="btn btn-primary" id="start-browser-btn">
+                            🚀 Iniciar Chrome
+                        </button>
+                        <button onclick="checkLogin()" class="btn btn-secondary" id="check-login-btn" disabled>
+                            🔍 Verificar Login
+                        </button>
+                        <button onclick="closeBrowser()" class="btn btn-secondary" id="close-browser-btn" disabled>
+                            ❌ Cerrar
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3>Estado</h3>
+                    <div style="margin-top: 15px;">
+                        <p><strong>Navegador:</strong> <span id="browser-state">No iniciado</span></p>
+                        <p><strong>Login:</strong> <span id="login-state">No verificado</span></p>
+                        <p><strong>URL:</strong> <span id="current-url" style="font-size: 12px;">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="log-container" id="nav-log">
+                <div class="log-entry info">Sistema de navegación listo</div>
+            </div>
+        </section>
+
+        <!-- PASO 2: Generador IA -->
+        <section class="section" id="ai-section">
+            <div class="section-header">
+                <h2>
+                    <span>🤖</span>
+                    <span>Paso 2: Configurar Generador IA</span>
+                </h2>
+                <span class="status-badge pending" id="ai-status">Pendiente</span>
+            </div>
+
+            <div class="status-message info" id="ai-message">
+                Configura tu API key de Google Gemini para generar descripciones
+            </div>
+
+            <div class="form-group">
+                <label>API Key de Google Gemini:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="password" id="api-key" class="form-control" 
+                           placeholder="AIza..." 
+                           value="{{ api_key or '' }}">
+                    <button onclick="validateApiKey()" class="btn btn-primary" id="validate-api-btn">
+                        ✅ Validar
+                    </button>
+                </div>
+                <small style="color: #666;">
+                    Obtén tu API key en: 
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
+                </small>
+            </div>
+
+            <div id="ai-config" style="display: none;">
+                <h3>Configuración del Prompt</h3>
+                <div class="form-group">
+                    <label>Prompt para generación:</label>
+                    <textarea id="prompt-editor" class="form-control" rows="10" 
+                              style="font-family: monospace;">{{ default_prompt }}</textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- PASO 3: Productos -->
+        <section class="section" id="products-section">
+            <div class="section-header">
+                <h2>
+                    <span>📦</span>
+                    <span>Paso 3: Seleccionar Productos</span>
+                </h2>
+                <span class="status-badge pending" id="products-status">Pendiente</span>
+            </div>
+
+            <div class="status-message info" id="products-message">
+                Conecta a la base de datos y selecciona los productos a procesar
+            </div>
+
+            <!-- Conexión DB -->
+            <div style="margin-bottom: 20px;">
+                <button onclick="connectDatabase()" class="btn btn-primary" id="connect-db-btn">
+                    🔌 Conectar Base de Datos
+                </button>
+                <span id="db-info" style="margin-left: 20px; color: #666;">Desconectado</span>
+            </div>
+
+            <!-- Filtros -->
+            <div id="filters-container" style="display: none;">
+                <h3>Filtros</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Familia:</label>
+                        <select id="filter-familia" class="form-control" onchange="applyFilters()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Marca:</label>
+                        <select id="filter-marca" class="form-control" onchange="applyFilters()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock:</label>
+                        <select id="filter-stock" class="form-control" onchange="applyFilters()">
+                            <option value="">Todos</option>
+                            <option value="con_stock">Con Stock</option>
+                            <option value="sin_stock">Sin Stock</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Búsqueda:</label>
+                        <input type="text" id="search-text" class="form-control" 
+                               placeholder="Buscar..." onkeyup="applyFilters()">
+                    </div>
+                </div>
+
+                <!-- Acciones de selección -->
+                <div style="margin: 20px 0;">
+                    <button onclick="selectAll(true)" class="btn btn-secondary">✅ Seleccionar Todos</button>
+                    <button onclick="selectAll(false)" class="btn btn-secondary">❌ Deseleccionar Todos</button>
+                    <span style="margin-left: 20px;">
+                        <strong>Seleccionados:</strong> 
+                        <span id="selected-count">0</span>
+                    </span>
+                </div>
+
+                <!-- Tabla de productos -->
+                <div style="overflow-x: auto;">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">
+                                    <input type="checkbox" id="select-all-checkbox" 
+                                           onchange="toggleSelectAll()">
+                                </th>
+                                <th>SKU</th>
+                                <th>Descripción</th>
+                                <th>Marca</th>
+                                <th>Familia</th>
+                                <th>Stock</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: #666;">
+                                    Conecta a la base de datos para ver productos
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PASO 4: Procesamiento -->
+        <section class="section" id="process-section" style="display: none;">
+            <div class="section-header">
+                <h2>
+                    <span>⚡</span>
+                    <span>Paso 4: Procesamiento</span>
+                </h2>
+                <span class="status-badge pending" id="process-status">Listo</span>
+            </div>
+
+            <div class="status-message info" id="process-message">
+                Todo listo para procesar los productos seleccionados
+            </div>
+
+            <div style="text-align: center; padding: 40px;">
+                <h3>Resumen</h3>
+                <p style="margin: 20px 0;">
+                    <strong id="process-summary">0 productos seleccionados</strong>
+                </p>
+                <button onclick="startProcessing()" class="btn btn-success" style="font-size: 18px; padding: 15px 30px;">
+                    🚀 Iniciar Procesamiento
+                </button>
+            </div>
+
+            <!-- Log de procesamiento -->
+            <div class="log-container" id="process-log" style="height: 300px; margin-top: 20px;">
+                <div class="log-entry info">Esperando inicio de procesamiento...</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Estado global
+        let appState = {
+            navigation: { ready: false, browser: null, logged: false },
+            ai: { ready: false, apiKey: null },
+            products: { ready: false, connected: false, selected: [] },
+            currentStep: 1
+        };
+
+        // Funciones de navegación
+        async function startBrowser() {
+            showLoading();
+            addLog('nav-log', 'Iniciando navegador Chrome...', 'info');
+            
+            try {
+                const response = await fetch('/api/navigation/start-browser', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    appState.navigation.browser = 'active';
+                    document.getElementById('browser-state').textContent = '🟢 Activo';
+                    document.getElementById('check-login-btn').disabled = false;
+                    document.getElementById('close-browser-btn').disabled = false;
+                    addLog('nav-log', 'Navegador iniciado. Por favor, haz login en Stelorder.', 'success');
+                } else {
+                    addLog('nav-log', 'Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                addLog('nav-log', 'Error al iniciar navegador: ' + error.message, 'error');
+            }
+            
+            hideLoading();
+        }
+
+        async function checkLogin() {
+            showLoading();
+            addLog('nav-log', 'Verificando login...', 'info');
+            
+            try {
+                const response = await fetch('/api/navigation/check-login');
+                const result = await response.json();
+                
+                if (result.logged_in) {
+                    appState.navigation.logged = true;
+                    appState.navigation.ready = true;
+                    document.getElementById('login-state').textContent = '✅ Conectado';
+                    updateStepStatus('navigation', 'completed');
+                    document.getElementById('nav-status').textContent = 'Listo';
+                    document.getElementById('nav-status').className = 'status-badge ready';
+                    addLog('nav-log', 'Login verificado correctamente', 'success');
+                    checkReadyState();
+                } else {
+                    addLog('nav-log', 'No se detectó login activo', 'error');
+                }
+            } catch (error) {
+                addLog('nav-log', 'Error al verificar login: ' + error.message, 'error');
+            }
+            
+            hideLoading();
+        }
+
+        async function closeBrowser() {
+            if (confirm('¿Cerrar el navegador?')) {
+                const response = await fetch('/api/navigation/close-browser', { method: 'POST' });
+                appState.navigation.browser = null;
+                appState.navigation.logged = false;
+                appState.navigation.ready = false;
+                document.getElementById('browser-state').textContent = '🔴 Cerrado';
+                document.getElementById('login-state').textContent = 'No verificado';
+                updateStepStatus('navigation', 'pending');
+            }
+        }
+
+        // Funciones de IA
+        async function validateApiKey() {
+            const apiKey = document.getElementById('api-key').value.trim();
+            if (!apiKey) {
+                addLog('nav-log', 'Por favor ingresa una API key', 'error');
+                return;
+            }
+            
+            showLoading();
+            addLog('nav-log', 'Validando API key...', 'info');
+            
+            try {
+                const response = await fetch('/api/ai-generator/validate-api-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    appState.ai.ready = true;
+                    appState.ai.apiKey = apiKey;
+                    document.getElementById('ai-config').style.display = 'block';
+                    updateStepStatus('ai', 'completed');
+                    document.getElementById('ai-status').textContent = 'Configurado';
+                    document.getElementById('ai-status').className = 'status-badge ready';
+                    addLog('nav-log', 'API key válida, IA configurada', 'success');
+                    checkReadyState();
+                } else {
+                    addLog('nav-log', 'Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                addLog('nav-log', 'Error al validar API key: ' + error.message, 'error');
+            }
+            
+            hideLoading();
+        }
+
+        // Funciones de productos
+        async function connectDatabase() {
+            showLoading();
+            addLog('nav-log', 'Conectando a base de datos...', 'info');
+            
+            try {
+                const response = await fetch('/api/products/connect', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    appState.products.connected = true;
+                    document.getElementById('db-info').textContent = `✅ ${result.info}`;
+                    document.getElementById('filters-container').style.display = 'block';
+                    addLog('nav-log', 'Base de datos conectada', 'success');
+                    
+                    // Cargar productos
+                    await loadProducts();
+                } else {
+                    addLog('nav-log', 'Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                addLog('nav-log', 'Error al conectar DB: ' + error.message, 'error');
+            }
+            
+            hideLoading();
+        }
+
+        async function loadProducts() {
+            const response = await fetch('/api/products/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filters: {} })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                renderProducts(result.products);
+                loadFilterOptions(result.products);
+                updateStepStatus('products', 'active');
+            }
+        }
+
+        function renderProducts(products) {
+            const tbody = document.getElementById('products-tbody');
+            tbody.innerHTML = '';
+            
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                const isSelected = appState.products.selected.includes(product.SKU);
+                
+                if (isSelected) row.classList.add('selected');
+                
+                row.innerHTML = `
+                    <td><input type="checkbox" ${isSelected ? 'checked' : ''} 
+                        onchange="toggleProduct('${product.SKU}', this.checked)"></td>
+                    <td>${product.SKU}</td>
+                    <td>${product.Descripción || '-'}</td>
+                    <td>${product.Marca || '-'}</td>
+                    <td>${product.Familia || '-'}</td>
+                    <td>${product.Stock || 0}</td>
+                    <td>$${(product.Precio_USD_con_IVA || 0).toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            updateSelectedCount();
+        }
+
+        function toggleProduct(sku, selected) {
+            if (selected) {
+                if (!appState.products.selected.includes(sku)) {
+                    appState.products.selected.push(sku);
+                }
+            } else {
+                appState.products.selected = appState.products.selected.filter(s => s !== sku);
+            }
+            
+            updateSelectedCount();
+            checkReadyState();
+        }
+
+        function selectAll(select) {
+            const checkboxes = document.querySelectorAll('#products-tbody input[type="checkbox"]');
+            appState.products.selected = [];
+            
+            checkboxes.forEach(cb => {
+                cb.checked = select;
+                if (select) {
+                    const sku = cb.parentElement.parentElement.cells[1].textContent;
+                    appState.products.selected.push(sku);
+                }
+            });
+            
+            updateSelectedCount();
+            checkReadyState();
+        }
+
+        function updateSelectedCount() {
+            const count = appState.products.selected.length;
+            document.getElementById('selected-count').textContent = count;
+            document.getElementById('process-summary').textContent = `${count} productos seleccionados`;
+            
+            if (count > 0) {
+                appState.products.ready = true;
+                updateStepStatus('products', 'completed');
+                document.getElementById('products-status').textContent = 'Listo';
+                document.getElementById('products-status').className = 'status-badge ready';
+            }
+        }
+
+        // Funciones de procesamiento
+        async function startProcessing() {
+            if (!confirm(`¿Procesar ${appState.products.selected.length} productos?`)) return;
+            
+            showLoading();
+            addLog('process-log', 'Iniciando procesamiento...', 'info');
+            
+            try {
+                // Preparar productos
+                const response = await fetch('/api/products/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        filters: { selected_skus: appState.products.selected }
+                    })
+                });
+                
+                const result = await response.json();
+                const products = result.products.filter(p => 
+                    appState.products.selected.includes(p.SKU)
+                );
+                
+                // Procesar
+                const processResponse = await fetch('/api/navigation/process-products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        products: products,
+                        settings: {
+                            use_ai: true,
+                            api_key: appState.ai.apiKey,
+                            prompt: document.getElementById('prompt-editor').value
+                        }
+                    })
+                });
+                
+                if (processResponse.ok) {
+                    addLog('process-log', 'Procesamiento iniciado', 'success');
+                    updateStepStatus('process', 'active');
+                    
+                    // Iniciar monitoreo
+                    monitorProgress();
+                }
+            } catch (error) {
+                addLog('process-log', 'Error: ' + error.message, 'error');
+            }
+            
+            hideLoading();
+        }
+
+        async function monitorProgress() {
+            const interval = setInterval(async () => {
+                const response = await fetch('/api/navigation/status');
+                const status = await response.json();
+                
+                if (status.is_processing) {
+                    const stats = status.stats;
+                    const progress = `Procesados: ${stats.products_processed}/${stats.total}`;
+                    addLog('process-log', progress, 'info');
+                    
+                    if (stats.products_failed > 0) {
+                        addLog('process-log', `Errores: ${stats.products_failed}`, 'error');
+                    }
+                } else {
+                    clearInterval(interval);
+                    addLog('process-log', 'Procesamiento completado', 'success');
+                    updateStepStatus('process', 'completed');
+                }
+            }, 2000);
+        }
+
+        // Utilidades
+        function updateStepStatus(step, status) {
+            const stepElement = document.getElementById(`step-${step}`);
+            stepElement.className = `step ${status}`;
+            
+            if (status === 'completed') {
+                const nextSteps = {
+                    'navigation': 'ai',
+                    'ai': 'products',
+                    'products': 'process'
+                };
+                
+                const nextStep = nextSteps[step];
+                if (nextStep) {
+                    document.getElementById(`step-${nextStep}`).classList.add('active');
+                }
+            }
+        }
+
+        function checkReadyState() {
+            const allReady = appState.navigation.ready && 
+                           appState.ai.ready && 
+                           appState.products.ready && 
+                           appState.products.selected.length > 0;
+            
+            if (allReady) {
+                document.getElementById('process-section').style.display = 'block';
+                document.getElementById('process-all-btn').disabled = false;
+                document.getElementById('global-status').textContent = 'Estado: Listo para procesar';
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function addLog(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function loadFilterOptions(products) {
+            // Cargar opciones de filtros
+            const familias = [...new Set(products.map(p => p.Familia).filter(Boolean))];
+            const marcas = [...new Set(products.map(p => p.Marca).filter(Boolean))];
+            
+            const familiaSelect = document.getElementById('filter-familia');
+            familias.forEach(f => {
+                const option = document.createElement('option');
+                option.value = f;
+                option.textContent = f;
+                familiaSelect.appendChild(option);
+            });
+            
+            const marcaSelect = document.getElementById('filter-marca');
+            marcas.forEach(m => {
+                const option = document.createElement('option');
+                option.value = m;
+                option.textContent = m;
+                marcaSelect.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            // Implementar filtrado
+            // Por ahora solo actualiza la vista
+            loadProducts();
+        }
+
+        function toggleSelectAll() {
+            const checkbox = document.getElementById('select-all-checkbox');
+            selectAll(checkbox.checked);
+        }
+
+        // Función global para procesar todo
+        async function processAll() {
+            await startProcessing();
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStepStatus('navigation', 'active');
+            
+            // Cargar API key si existe
+            const savedApiKey = localStorage.getItem('gemini_api_key');
+            if (savedApiKey) {
+                document.getElementById('api-key').value = savedApiKey;
+            }
+        });
+    </script>
+</body>
+</html>

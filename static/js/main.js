@@ -198,9 +198,41 @@ function hideProcessingOverlay() {
     if (overlay) overlay.remove();
 }
 
+// Agregar función para forzar recarga
+async function forceRefresh() {
+    try {
+        const response = await fetch('/api/force-refresh', { method: 'POST' });
+        const result = await response.json();
+        
+        if (result.success) {
+            // Limpiar todo el cache del navegador
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            
+            // Recargar con parámetro único
+            window.location.href = window.location.href.split('?')[0] + '?v=' + result.build + '&t=' + Date.now();
+        }
+    } catch (error) {
+        console.error('Error forzando actualización:', error);
+        // Forzar recarga de todas formas
+        window.location.reload(true);
+    }
+}
+
 // Atajos de teclado
 function setupKeyboardShortcuts() {
     document.addEventListener('keydown', function(event) {
+        // Ctrl+Shift+R - Recarga forzada
+        if (event.ctrlKey && event.shiftKey && event.key === 'R') {
+            event.preventDefault();
+            forceRefresh();
+        }
+        
         // Ctrl+S - Guardar
         if (event.ctrlKey && event.key === 's') {
             event.preventDefault();

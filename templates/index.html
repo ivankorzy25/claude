@@ -4,18 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STEL Shop Manager</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!-- Agregar meta tags para evitar cache -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v={{ version }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <!-- Incluir jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
+        <!-- Header con versión visible -->
         <header class="app-header">
             <div class="logo">
                 <h1>🏭 STEL Shop Manager</h1>
-                <span class="version">v1.0.0</span>
+                <span class="version">v{{ app_version }} ({{ build_number }})</span>
             </div>
             <div class="header-status">
                 <div class="status-item" id="db-status">
@@ -49,11 +53,11 @@
             </div>
         </div>
 
-        <!-- Tab Content -->
+        <!-- Tab Content con versionado en iframes -->
         <div class="tab-content">
             <!-- Products Tab -->
             <div id="products-tab" class="tab-panel active">
-                <iframe src="{{ url_for('static', filename='modules/products/products.html') }}" 
+                <iframe src="{{ url_for('static', filename='modules/products/products.html') }}?v={{ version }}" 
                         frameborder="0" 
                         width="100%" 
                         height="100%">
@@ -62,7 +66,7 @@
 
             <!-- AI Generator Tab -->
             <div id="ai-generator-tab" class="tab-panel">
-                <iframe src="{{ url_for('static', filename='modules/ai_generator/generator.html') }}" 
+                <iframe src="{{ url_for('static', filename='modules/ai_generator/generator.html') }}?v={{ version }}" 
                         frameborder="0" 
                         width="100%" 
                         height="100%">
@@ -71,7 +75,7 @@
 
             <!-- Navigation Tab -->
             <div id="navigation-tab" class="tab-panel">
-                <iframe src="{{ url_for('static', filename='modules/navigation/navigation.html') }}" 
+                <iframe src="{{ url_for('static', filename='modules/navigation/navigation.html') }}?v={{ version }}" 
                         frameborder="0" 
                         width="100%" 
                         height="100%">
@@ -128,6 +132,6 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v={{ version }}"></script>
 </body>
 </html>

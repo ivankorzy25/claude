@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - STEL Shop</title>
-    <link rel="stylesheet" href="products.css">
+    <!-- Anti-cache -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- CSS con timestamp para evitar cache -->
+    <link rel="stylesheet" href="products.css?t=<?php echo time(); ?>">
 </head>
 <body>
     <!-- Overlay de carga -->
@@ -299,6 +305,12 @@
         </div>
     </div>
 
-    <script src="products.js"></script>
+    <!-- JavaScript con timestamp -->
+<script>
+    // Forzar recarga si detecta versión antigua
+    const CURRENT_VERSION = new Date().getTime();
+    window.moduleVersion = CURRENT_VERSION;
+</script>
+<script src="products.js?t=<?php echo time(); ?>"></script>
 </body>
 </html>
